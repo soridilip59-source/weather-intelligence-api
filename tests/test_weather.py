@@ -8,6 +8,15 @@ from app.main import app
 client = TestClient(app)
 
 
+def test_homepage_serves_weather_dashboard():
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "Weather Intelligence" in response.text
+    assert 'id="search-form"' in response.text
+
+
 @pytest.fixture(autouse=True)
 def clear_history():
     from app.database import SessionLocal

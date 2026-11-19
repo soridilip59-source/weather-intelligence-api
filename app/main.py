@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.database import Base, engine
 from app.routes.weather import router
@@ -21,10 +24,12 @@ app.add_middleware(
 
 app.include_router(router, prefix="/api/v1")
 
+STATIC_DIR = Path(__file__).parent / "static"
 
-@app.get("/", tags=["System"])
-def welcome() -> dict[str, str]:
-    return {"message": "Welcome to the Weather Intelligence API"}
+
+@app.get("/", response_class=FileResponse, include_in_schema=False)
+def home() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/health", tags=["System"])

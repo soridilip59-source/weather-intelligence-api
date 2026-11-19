@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fb">
+  <title>Weather Intelligence</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #17243b;
+      background: #f4f7fb;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 82% 0%, rgba(196, 220, 255, .48), transparent 34rem),
+        #f4f7fb;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 30px 0 42px;
+    }
+
+    .topbar, .brand, .top-links, .search-row, .weather-heading, .history-heading,
+    .history-item, .history-actions, .metric-label {
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar { justify-content: space-between; margin-bottom: 60px; }
+    .brand { gap: 12px; color: #17243b; text-decoration: none; }
+
+    .brand-mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 14px;
+      color: white;
+      background: linear-gradient(145deg, #498af5, #7358e8);
+      box-shadow: 0 8px 18px rgba(77, 117, 230, .24);
+    }
+
+    .brand-name { font-size: 15px; font-weight: 750; letter-spacing: -.3px; }
+    .brand-caption { margin-top: 2px; color: #8390a5; font-size: 11px; }
+    .top-links { gap: 22px; }
+    .top-links a { color: #67758d; font-size: 13px; font-weight: 600; text-decoration: none; }
+    .top-links a:hover { color: #4b67d5; }
+
+    .intro { max-width: 660px; margin-bottom: 30px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: #5b71d7;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+    }
+
+    h1 { margin: 0; font-size: clamp(36px, 5vw, 54px); letter-spacing: -2.4px; line-height: 1.08; }
+    .intro-copy { max-width: 510px; margin: 14px 0 0; color: #748198; font-size: 15px; line-height: 1.7; }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(300px, .85fr);
+      align-items: start;
+      gap: 22px;
+    }
+
+    .main-column { display: grid; gap: 18px; }
+    .panel {
+      border: 1px solid #e8edf5;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .88);
+      box-shadow: 0 14px 40px rgba(28, 48, 84, .055);
+    }
+
+    .search-panel { padding: 25px; }
+    .section-title { margin: 0; font-size: 16px; font-weight: 750; letter-spacing: -.3px; }
+    .section-copy { margin: 7px 0 18px; color: #8894a8; font-size: 13px; }
+    .search-row { gap: 10px; }
+
+    .city-input {
+      width: 100%;
+      min-width: 0;
+      height: 50px;
+      padding: 0 16px;
+      border: 1px solid #e2e8f1;
+      border-radius: 13px;
+      outline: none;
+      color: #18263d;
+      background: #fbfcfe;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .city-input:focus { border-color: #7491f0; box-shadow: 0 0 0 4px rgba(103, 133, 236, .12); }
+    .city-input::placeholder { color: #a4afbf; }
+
+    .search-button {
+      display: inline-flex;
+      flex: 0 0 auto;
+      height: 50px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 13px;
+      color: white;
+      background: linear-gradient(135deg, #587af0, #725fe4);
+      box-shadow: 0 7px 14px rgba(89, 113, 224, .2);
+      font-size: 13px;
+      font-weight: 700;
+      transition: transform .18s, opacity .18s;
+    }
+
+    .search-button:hover { transform: translateY(-1px); }
+    .search-button:disabled { cursor: wait; opacity: .65; transform: none; }
+    .notice { min-height: 19px; margin: 12px 0 0; color: #8490a2; font-size: 12px; }
+    .notice[data-kind="error"], .history-message[data-kind="error"] { color: #c34b55; }
+    .notice[data-kind="success"] { color: #278267; }
+
+    .weather-card {
+      overflow: hidden;
+      padding: 26px;
+      border: 0;
+      color: white;
+      background:
+        radial-gradient(circle at 90% 5%, rgba(255, 255, 255, .2), transparent 13rem),
+        linear-gradient(125deg, #3478df 0%, #526fe0 48%, #765bdb 100%);
+      box-shadow: 0 18px 36px rgba(74, 103, 203, .2);
+    }
+
+    .weather-card[hidden] { display: none; }
+    .weather-heading { justify-content: space-between; gap: 16px; }
+    .location { margin: 0; font-size: 23px; font-weight: 750; letter-spacing: -.6px; }
+    .description { margin: 6px 0 0; color: rgba(255, 255, 255, .78); font-size: 13px; }
+
+    .sun-icon {
+      position: relative;
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+      border: 2px solid rgba(255, 255, 255, .62);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .2);
+      box-shadow: 0 0 0 8px rgba(255, 255, 255, .08);
+    }
+
+    .sun-icon::after {
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      background: #fff3bd;
+      content: "";
+    }
+
+    .temperature-row { display: flex; align-items: baseline; gap: 12px; margin: 24px 0 22px; }
+    .temperature { font-size: clamp(56px, 8vw, 76px); font-weight: 650; letter-spacing: -5px; line-height: .95; }
+    .feels-like { color: rgba(255, 255, 255, .78); font-size: 12px; }
+
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .metric {
+      min-width: 0;
+      padding: 13px 12px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .11);
+    }
+
+    .metric-label { gap: 6px; color: rgba(255, 255, 255, .72); font-size: 10px; }
+    .metric-value { overflow: hidden; margin-top: 8px; font-size: 14px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+
+    .history-panel { padding: 23px 21px; }
+    .history-heading { justify-content: space-between; gap: 10px; margin-bottom: 17px; }
+    .history-count {
+      display: grid;
+      min-width: 26px;
+      height: 26px;
+      place-items: center;
+      padding: 0 7px;
+      border-radius: 9px;
+      color: #5f70cc;
+      background: #eff1ff;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .history-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+    .history-item {
+      min-width: 0;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid #edf0f5;
+      border-radius: 13px;
+      background: #fff;
+    }
+
+    .history-city {
+      display: block;
+      overflow: hidden;
+      max-width: 155px;
+      padding: 0;
+      border: 0;
+      color: #263650;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-city:hover { color: #536cd1; }
+    .history-meta { overflow: hidden; margin-top: 4px; color: #97a1b1; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .history-temp { flex: 0 0 auto; color: #5369c7; font-size: 13px; font-weight: 750; }
+    .delete-button {
+      width: 27px;
+      height: 27px;
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 8px;
+      color: #9aa4b4;
+      background: transparent;
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .delete-button:hover { color: #c34b55; background: #fff0f1; }
+    .history-empty, .history-message { margin: 0; padding: 16px 8px; color: #929daf; font-size: 12px; line-height: 1.6; text-align: center; }
+    .history-message { padding: 0; text-align: left; }
+    .footer { margin-top: 28px; color: #9aa5b5; font-size: 11px; text-align: center; }
+    .footer a { color: #6678d2; text-decoration: none; }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 28px, 560px); padding-top: 20px; }
+      .topbar { margin-bottom: 42px; }
+      .top-links { gap: 14px; }
+      .dashboard { grid-template-columns: 1fr; }
+      .history-panel { order: 2; }
+      .search-panel, .weather-card { padding: 21px; }
+    }
+
+    @media (max-width: 420px) {
+      .top-links { gap: 10px; }
+      .top-links a { font-size: 11px; }
+      .brand-caption { display: none; }
+      .search-row { align-items: stretch; flex-direction: column; }
+      .search-button { width: 100%; }
+      .metrics { gap: 7px; }
+      .metric { padding: 11px 8px; }
+      .metric-value { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Weather Intelligence home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span>
+          <span class="brand-name">Weather Intelligence</span>
+          <span class="brand-caption">Current conditions, made clear</span>
+        </span>
+      </a>
+      <nav class="top-links" aria-label="Project links">
+        <a href="/docs">API docs</a>
+        <a href="/health">Status</a>
+      </nav>
+    </header>
+
+    <section class="intro">
+      <p class="eyebrow">Weather dashboard</p>
+      <h1>Weather at a glance.</h1>
+      <p class="intro-copy">Search a city to see current conditions, temperature, humidity, and wind. Your recent searches are saved here too.</p>
+    </section>
+
+    <main class="dashboard">
+      <section class="main-column" aria-label="Weather search">
+        <div class="panel search-panel">
+          <h2 class="section-title">Find a city</h2>
+          <p class="section-copy">Enter a city name to get the latest conditions.</p>
+          <form id="search-form">
+            <div class="search-row">
+              <input class="city-input" id="city-input" name="city" type="text" minlength="2" maxlength="100" placeholder="e.g. Delhi, London, Tokyo" autocomplete="off" required>
+              <button class="search-button" id="search-button" type="submit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="2"/>
+                  <path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Search weather
+              </button>
+            </div>
+          </form>
+          <p class="notice" id="notice" role="status" aria-live="polite"></p>
+        </div>
+
+        <section class="panel weather-card" id="weather-card" aria-live="polite" hidden>
+          <div class="weather-heading">
+            <div>
+              <h2 class="location" id="location"></h2>
+              <p class="description" id="description"></p>
+            </div>
+            <span class="sun-icon" aria-hidden="true"></span>
+          </div>
+          <div class="temperature-row">
+            <span class="temperature" id="temperature"></span>
+            <span class="feels-like" id="feels-like"></span>
+          </div>
+          <div class="metrics">
+            <div class="metric">
+              <span class="metric-label">Humidity</span>
+              <div class="metric-value" id="humidity"></div>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Wind speed</span>
+              <div class="metric-value" id="wind-speed"></div>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Conditions</span>
+              <div class="metric-value" id="condition"></div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <aside class="panel history-panel" aria-labelledby="history-title">
+        <div class="history-heading">
+          <h2 class="section-title" id="history-title">Recent searches</h2>
+          <span class="history-count" id="history-count">0</span>
+        </div>
+        <p class="history-message" id="history-message" role="status"></p>
+        <ul class="history-list" id="history-list"></ul>
+      </aside>
+    </main>
+
+    <footer class="footer">Weather data powered by OpenWeather · <a href="/docs">Explore the API</a></footer>
+  </div>
+
+  <script>
+    const form = document.getElementById("search-form");
+    const cityInput = document.getElementById("city-input");
+    const searchButton = document.getElementById("search-button");
+    const notice = document.getElementById("notice");
+    const weatherCard = document.getElementById("weather-card");
+    const historyList = document.getElementById("history-list");
+    const historyCount = document.getElementById("history-count");
+    const historyMessage = document.getElementById("history-message");
+
+    function setNotice(message, kind = "") {
+      notice.textContent = message;
+      notice.dataset.kind = kind;
+    }
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    function formatDate(value) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime())
+        ? ""
+        : date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+    }
+
+    async function readJson(response) {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.detail || "The request could not be completed.");
+      }
+      return payload;
+    }
+
+    function showWeather(weather) {
+      setText("location", `${weather.city}, ${weather.country}`);
+      setText("description", weather.description);
+      setText("temperature", `${Number(weather.temperature).toFixed(1)}°C`);
+      setText("feels-like", `Feels like ${Number(weather.feels_like).toFixed(1)}°C`);
+      setText("humidity", `${weather.humidity}%`);
+      setText("wind-speed", `${weather.wind_speed} m/s`);
+      setText("condition", weather.description);
+      weatherCard.hidden = false;
+    }
+
+    async function searchCity(city) {
+      searchButton.disabled = true;
+      setNotice("Getting current weather…", "loading");
+      try {
+        const query = new URLSearchParams({ city });
+        const response = await fetch(`/api/v1/weather?${query}`);
+        const weather = await readJson(response);
+        showWeather(weather);
+        setNotice("Weather updated and saved to your search history.", "success");
+        await loadHistory();
+      } catch (error) {
+        setNotice(error.message || "Could not load weather. Please try again.", "error");
+      } finally {
+        searchButton.disabled = false;
+      }
+    }
+
+    function createHistoryItem(record) {
+      const item = document.createElement("li");
+      item.className = "history-item";
+
+      const cityInfo = document.createElement("div");
+      cityInfo.style.minWidth = "0";
+
+      const cityButton = document.createElement("button");
+      cityButton.className = "history-city";
+      cityButton.type = "button";
+      cityButton.textContent = `${record.city}, ${record.country}`;
+      cityButton.title = "Search this city again";
+      cityButton.addEventListener("click", () => {
+        cityInput.value = record.city;
+        searchCity(record.city);
+      });
+
+      const date = document.createElement("div");
+      date.className = "history-meta";
+      date.textContent = formatDate(record.searched_at);
+      cityInfo.append(cityButton, date);
+
+      const temperature = document.createElement("span");
+      temperature.className = "history-temp";
+      temperature.textContent = `${Number(record.temperature).toFixed(1)}°`;
+
+      const actions = document.createElement("div");
+      actions.className = "history-actions";
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "delete-button";
+      deleteButton.type = "button";
+      deleteButton.textContent = "×";
+      deleteButton.setAttribute("aria-label", `Delete ${record.city} search`);
+      deleteButton.addEventListener("click", () => deleteSearch(record.id));
+      actions.append(temperature, deleteButton);
+
+      item.append(cityInfo, actions);
+      return item;
+    }
+
+    async function loadHistory() {
+      historyMessage.textContent = "";
+      historyMessage.dataset.kind = "";
+      try {
+        const response = await fetch("/api/v1/history");
+        const records = await readJson(response);
+        historyCount.textContent = String(records.length);
+        historyList.replaceChildren();
+
+        if (records.length === 0) {
+          const empty = document.createElement("li");
+          empty.className = "history-empty";
+          empty.textContent = "Your searched cities will appear here.";
+          historyList.append(empty);
+          return;
+        }
+
+        records.forEach((record) => historyList.append(createHistoryItem(record)));
+      } catch (error) {
+        historyMessage.textContent = error.message || "Could not load search history.";
+        historyMessage.dataset.kind = "error";
+      }
+    }
+
+    async function deleteSearch(recordId) {
+      try {
+        const response = await fetch(`/api/v1/history/${recordId}`, { method: "DELETE" });
+        if (!response.ok) {
+          const payload = await response.json();
+          throw new Error(payload.detail || "Could not delete this search.");
+        }
+        await loadHistory();
+      } catch (error) {
+        historyMessage.textContent = error.message || "Could not delete this search.";
+        historyMessage.dataset.kind = "error";
+      }
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const city = cityInput.value.trim();
+      if (city.length < 2) {
+        setNotice("Enter a city name with at least 2 characters.", "error");
+        return;
+      }
+      searchCity(city);
+    });
+
+    loadHistory();
+  </script>
+</body>
+</html>
