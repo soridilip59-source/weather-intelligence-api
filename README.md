@@ -1,6 +1,32 @@
 # Weather Intelligence API
 
-A modular FastAPI backend that retrieves current weather data from OpenWeather and stores search history in SQLite.
+Weather Intelligence API is a modular Python backend that retrieves real-time weather information from OpenWeather and stores city search history in SQLite.
+
+## Problem Statement
+
+People need reliable, current weather information for travel planning, daily decisions, and general awareness. This project provides a RESTful API that validates city searches, retrieves weather data from an external provider, standardizes the response, and keeps a searchable history of previous requests.
+
+## Technology Stack
+
+- Python 3
+- FastAPI
+- Uvicorn
+- HTTPX
+- SQLite
+- SQLAlchemy
+- Pydantic
+- Python-dotenv
+- Pytest
+- Swagger UI
+
+## Features
+
+- Retrieve current weather by city name
+- Store weather searches in SQLite
+- List, retrieve, and delete search history records
+- Validate city names
+- Handle missing API keys, network failures, timeouts, and external API errors
+- Interactive API documentation through Swagger UI
 
 ## Setup
 
@@ -21,12 +47,66 @@ Open `http://127.0.0.1:8000/docs` for Swagger UI.
 
 ## Endpoints
 
-- `GET /` - Welcome message
-- `GET /health` - Health check
-- `GET /api/v1/weather?city=Delhi` - Current weather
-- `GET /api/v1/history` - Search history
-- `GET /api/v1/history/{id}` - One history record
-- `DELETE /api/v1/history/{id}` - Delete a history record
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/` | Welcome message |
+| `GET` | `/health` | Application health check |
+| `GET` | `/api/v1/weather?city=Delhi` | Get current weather for a city |
+| `GET` | `/api/v1/history` | Retrieve all search history |
+| `GET` | `/api/v1/history/{id}` | Retrieve one history record |
+| `DELETE` | `/api/v1/history/{id}` | Delete one history record |
+
+## Sample Responses
+
+### Current Weather
+
+`GET /api/v1/weather?city=Delhi`
+
+```json
+{
+  "city": "Delhi",
+  "country": "IN",
+  "temperature": 28.5,
+  "feels_like": 30.2,
+  "humidity": 65,
+  "description": "Clear Sky",
+  "wind_speed": 3.5
+}
+```
+
+### Welcome
+
+`GET /`
+
+```json
+{
+  "message": "Welcome to the Weather Intelligence API"
+}
+```
+
+### Health
+
+`GET /health`
+
+```json
+{
+  "status": "ok"
+}
+```
+
+## Screenshots
+
+Add screenshots of the running application and Swagger documentation to this section:
+
+1. Start the server with `uvicorn app.main:app --reload`.
+2. Capture the Swagger UI at `http://127.0.0.1:8000/docs`.
+3. Capture a successful `/api/v1/weather?city=Delhi` response.
+4. Save the images in a `screenshots/` directory and link them here.
+
+<!-- Example:
+![Swagger UI](screenshots/swagger-ui.png)
+![Weather response](screenshots/weather-response.png)
+-->
 
 ## Tests
 
