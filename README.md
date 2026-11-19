@@ -53,7 +53,7 @@ For local PostgreSQL:
 2. Add this line to `.env`:
 
 ```env
-DATABASE_URL=postgresql://postgres:your_password@localhost:5432/weather_intelligence
+DATABASE_URL=postgresql+psycopg://postgres:your_password@localhost:5432/weather_intelligence
 ```
 
 3. Install dependencies and start the app:
