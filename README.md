@@ -45,6 +45,26 @@ uvicorn app.main:app --reload
 
 Open `http://127.0.0.1:8000/docs` for Swagger UI.
 
+## PostgreSQL Setup
+
+For local PostgreSQL:
+
+1. Install PostgreSQL and create a database.
+2. Add this line to `.env`:
+
+```env
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/weather_intelligence
+```
+
+3. Install dependencies and start the app:
+
+```powershell
+python -m pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+For Render or Railway, create a PostgreSQL database and copy its internal or external connection URL into the `DATABASE_URL` environment variable. The app also accepts legacy `postgres://` URLs and converts them automatically.
+
 ## Endpoints
 
 | Method | Endpoint | Description |
