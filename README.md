@@ -65,6 +65,19 @@ uvicorn app.main:app --reload
 
 For Render or Railway, create a PostgreSQL database and copy its internal or external connection URL into the `DATABASE_URL` environment variable. The app also accepts legacy `postgres://` URLs and converts them automatically.
 
+## Deploy on Render
+
+1. Push the repository to GitHub.
+2. Open Render and select **New > Blueprint**.
+3. Connect the `weather-intelligence-api` repository.
+4. Render will create `weather-intelligence-api` and `weather-intelligence-db` using `render.yaml`.
+5. Add the `OPENWEATHER_API_KEY` secret in the Render environment settings.
+6. Deploy and open `/docs`, for example:
+
+```text
+https://weather-intelligence-api.onrender.com/docs
+```
+
 ## Endpoints
 
 | Method | Endpoint | Description |
